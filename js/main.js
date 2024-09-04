@@ -1,4 +1,5 @@
 const btnAgregar = document.getElementById("btnAgregar");
+const btnClear = document.getElementById("btnClear")
 const txtNombre = document.getElementById("Name");
 const txtNumber = document.getElementById("Number");
 const alertValidacionesTexto = document.getElementById("alertValidacionesTexto");
@@ -15,6 +16,8 @@ let contador = 0;
 let precio = 0;
 let costoTotal = 0;
 let totalEnProductos = 0;
+
+let datos = new Array()
 
 function validarCantidad() {
     if (txtNumber.value.length == 0) {
@@ -71,6 +74,16 @@ btnAgregar.addEventListener("click", function (event) {
                     <td>${cantidad}</td>
                     <td>$${precio.toFixed(2)}</td>
             </tr>`;
+
+        let elemento = {
+            "contador": contador,
+            "nombre": txtNombre.value,
+            "cantidad": txtNumber.value,
+            "precio": precio
+        }
+        datos.push(elemento)
+        localStorage.setItem("datos", JSON.stringify(datos))
+
         cuerpoTabla.insertAdjacentHTML("beforeend", row);
 
         costoTotal += precio * cantidad;
@@ -79,8 +92,8 @@ btnAgregar.addEventListener("click", function (event) {
         productosTotal.innerText = totalEnProductos;
         precioTotal.innerText = "$ " + costoTotal.toFixed(2);
 
-        localStorage.setItem("contador", contador )
-        localStorage.setItem("totalEnProductos", totalEnProductos )
+        localStorage.setItem("contador", contador)
+        localStorage.setItem("totalEnProductos", totalEnProductos)
         localStorage.setItem("costoTotal", costoTotal)
 
         txtNombre.value = "";
@@ -88,6 +101,39 @@ btnAgregar.addEventListener("click", function (event) {
         txtNombre.focus();
     } // isValid
 }); // btnAgregar .addEventListener
+
+btnClear.addEventListener("click", function (event) {
+    event.preventDefault()
+    //limpa la tabla
+    cuerpoTabla.innerHTML=""
+    //limpia el localStorage
+    localStorage.clear()
+    //Limpia el valor de los campos
+    txtNombre.value = ""
+    txtNumber.value = ""
+    //Reiniciar los contadores, costo total, totalEnProductos
+    contador = 0
+    costoTotal = 0
+    totalEnProductos = 0
+    //asignar las variables a los divs
+    contadorProductos.innerText = contador
+    precioTotal.innerText = "$" + costoTotal.toFixed(2)
+    productosTotal.innerText = totalEnProductos
+
+    //quitar bordes
+    txtNombre.style.border = "";
+    txtNumber.style.border = "";
+    //quitar alertar
+    alertValidacionesTexto.innerHTML = "";
+    alertValidaciones.style.display = "none";
+    //elimina por cada llave/clave un solo elemento
+    //localStorage.removeItem("contador")
+    //localStorage.removeItem("totalProducto")
+
+    //Manda el focus a
+    txtNombre.focus()
+
+})
 
 // Evento blur es cuando un campo pierde el foco (se sale del campo)
 
@@ -99,21 +145,34 @@ txtNumber.addEventListener("blur", function (event) {
     txtNumber.value = txtNumber.value.trim();
 });
 
-window.addEventListener("load", function(){
-    if (this.localStorage.getItem("contador") !=null){
+window.addEventListener("load", function () {
+    if (this.localStorage.getItem("contador") != null) {
         contador = Number(this.localStorage.getItem("contador"))
     }//!null
-    if (this.localStorage.getItem("totalEnProductos") !=null){
+    if (this.localStorage.getItem("totalEnProductos") != null) {
         totalEnProductos = Number(this.localStorage.getItem("totalEnProductos"))
     }//!null
-    if (this.localStorage.getItem("costoTotal") !=null){
+    if (this.localStorage.getItem("costoTotal") != null) {
         costoTotal = Number(this.localStorage.getItem("costoTotal"))
     }//!null
 
     contadorProductos.innerText = contador
-    productosTotal.innerText=totalEnProductos
-    precioTotal.innerText ="$ " + costoTotal.toFixed(2)
-   
+    productosTotal.innerText = totalEnProductos
+    precioTotal.innerText = "$ " + costoTotal.toFixed(2)
+
+
+    if (this.localStorage.getItem("datos") != null) {
+        costoTotal = JSON.parse(this.localStorage.getItem("datos"))
+    }//!=null
+    datos.forEach(r => {
+        let row = `<tr>
+                        <td>${r.contador}</td>
+                        <td>${r.nombre}</td>
+                        <td>${r.cantidad}</td>
+                        <td>${r.precio}</td>    
+                    </tr>`
+        cuerpoTabla.insertAdjacentHTML("beforeend", row)
+    })
 });//windows load
 
 
